@@ -1,4 +1,4 @@
-# Vue Application Demonstration
+# Priviledge Information
 
 This project introduce to use Vue 3 framework create single page application.
 
