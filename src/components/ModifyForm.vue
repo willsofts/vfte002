@@ -124,11 +124,24 @@
 						</tbody>
 					</table>
 					<div id="progtablelayer">
-						<ul id="progtablebody" class="ul-table-listing"></ul>
+						<ul id="progtablebody" class="ul-table-listing" ref="progtablebody">
+              <li class="prog-item-class ui-state-active" v-for="(item,index) in proglists" :key="item.programid">
+                <table class='prog-item-table-class'>
+                  <tr>
+                    <td class="cclass progno-column" align="center">{{ index+1 }}</td>
+                    <td class="cclass progid-column" align="center">{{  item.programid }}</td>
+                    <td class="cclass progname-column">{{ item.progname }}</td>
+                    <td class="cclass progctrl-column" align="center">
+                      <button class="btn-edit fa-btn fa fa-pencil" @click="startEditProgInGroup(item)"></button>
+                      <button class="btn-delete fa-btn fa fa-trash" @click="startRemoveProgInGroup(item)"></button>
+                    </td>
+                  </tr>
+                </table>
+              </li>
+            </ul>
 					</div>					
 				</div>
 			</div>
-
     </div>
   </template>
   <style>
@@ -146,6 +159,7 @@
   import { startWaiting, stopWaiting, submitFailure, detectErrorResponse }  from '@willsofts/will-app';
   import { confirmUpdate, confirmRemove, confirmCancel, successbox, serializeParameters, alertbox } from '@willsofts/will-app';
   import { InputNumber } from '@willsofts/will-control';
+  import { useSortable } from '@vueuse/integrations/useSortable';
   
   const APP_URL = "/api/sfte002";
   const defaultData = {
@@ -170,6 +184,8 @@
     },
     emits: ["data-updated","data-cancel"],
     setup(props) {
+      const proglists = ref([]);
+      useSortable('#progtablebody', proglists);	      
       const localData = ref({ ...defaultData }); 
       const disabledKeyField = ref(false);
       const reqalert = ref(props.labels.empty_alert);
@@ -185,7 +201,7 @@
         } 
       });
       const v$ = useVuelidate(validateRules, localData, { $lazy: true, $autoDirty: true });
-      return { v$, localData, disabledKeyField, reqalert };
+      return { v$, localData, disabledKeyField, reqalert, proglists };
     },
     created() {
       watch(this.$props, (newProps) => {      
@@ -195,11 +211,6 @@
     mounted() {
       this.$nextTick(function () {
         $("#modaldialog_layer").find(".modal-dialog").draggable();
-        $("#progtablebody").sortable({
-          stop: () => {
-            this.displaySequenceTableLists("#progtablebody");
-          }
-        });	
       });
     },
     methods: {
@@ -210,7 +221,7 @@
         this.$emit('update:formData', this.localData);
       },
       clearingFields() {
-        $("#progtablebody").empty();
+        this.proglists = [];
       },
       async cancelClick() {
         console.log("click: cancel");
@@ -251,10 +262,7 @@
       },
       startUpdateRecord() {
         confirmUpdate(() => {
-          let progids = [];
-          $("input.progidclass",$("#progtablebody")).each((index,element) => {
-            progids.push($(element).val());
-          });
+          let progids = this.proglists.map((prg) => prg.programid);
           this.localData.progid = progids;
           this.updateRecord(this.localData);
         });
@@ -278,8 +286,9 @@
               stopWaiting();
               console.log("success",data);
               if(detectErrorResponse(data)) return;
-              successbox();
-              this.$emit('data-updated',dataRecord,data);
+              successbox(() => {
+                this.$emit('data-updated',dataRecord,data);
+              });
             }
         });
       },
@@ -328,28 +337,11 @@
           },
           success: (data) => { 
             stopWaiting();
-            if(data.body["rows"]) {              
-              $(data.body.rows).each((index,element) => { 
-                this.displayProgramInfo(element["programid"],element["progname"],element["seqno"]);
-              });
-              this.displaySequenceTableLists("#progtablebody");
-              this.adjustProgTableHeight();
+            if(data.body.rows) { 
+              this.proglists = data.body.rows;
             }
           }
         });	
-      },
-      displaySequenceTableLists(tablelists) {
-        $("li",$(tablelists)).each(function(index) { 
-          let $table = $(this).find("table").eq(0);
-          $table.find("tr").eq(0).find("td").eq(0).html(""+(index+1));
-        });
-      },
-      adjustProgTableHeight() {
-        let totalHeight = 0;
-        $("#progtablebody li").each(function() {
-          totalHeight += $(this).outerHeight(); 
-        });
-        $("#progtablelayer").height(totalHeight+5);	
       },
       toggleCollapseExpand(event) {
         let $src = $(event.target).parent();
@@ -367,58 +359,38 @@
         console.log("add new program");
         let pid = $("#progingroup").val();
         if($.trim(pid)=="") return;
-        let found = $("input[value='"+pid+"']",$("#progtablebody")).length>0;
-        if(found) {
+        let prog = this.proglists.find((prg) => prg.programid == pid);
+        if(prog) {
           alertbox("Duplicate program entry");
           return;
         }
-        let idx = $("tr",$("#progtablebody")).length;
+        let idx = this.proglists.length;
         let text = $("option:selected",$("#progingroup")).text();
         let params = { groupname: this.localData.groupname, programid: $("#progingroup").val(), progname: text, parameters: "", seqno: idx+1 };
         this.$root.$refs.permitForm.startInsertRecord(params,() => {
-          this.displayProgramInfo(pid,text,idx+1);
-          this.adjustProgTableHeight();
+          this.proglists.push(params);
         });
-      },
-      displayProgramInfo(pid,pname,seqno) {
-        if(!seqno) seqno = "";
-        let $table = $("<table class='prog-item-table-class'></table>");
-        let $item = $('<li class="prog-item-class ui-state-active"></li>');	
-        let $tr = $("<tr></tr>");
-        let $td1 = $('<td class="cclass progno-column" align="center"></td>').append(seqno);
-        let $td2 = $('<td class="cclass progid-column" align="center"></td>').append(pid);
-        let $td3 = $('<td class="cclass progname-column">&nbsp;</td>').append(pname);
-        let $td4 = $('<td class="cclass progctrl-column" align="center"></td>');
-        let $ebtn = $('<button class="btn-edit fa-btn fa fa-pencil"></button>');
-        $ebtn.attr("title","Edit "+pid);
-        $ebtn.on("click",() => { 
-          this.editProgramInGroup(pid,this.localData.groupname);
-        });	
-        let $btn = $('<button class="btn-delete fa-btn fa fa-trash"></button>');
-        $btn.attr("title","Delete "+pid);
-        $btn.on("click",() => { 
-          confirmRemove([pid],() => { 
-            this.removeProgramInGroup(pid,this.localData.groupname,() => { 
-              $item.remove();
-              this.displaySequenceTableLists("#progtablebody");
-            });
-          });
-          return false;
-        });
-        $td4.append($ebtn).append("&nbsp;&nbsp;").append($btn);
-        let $uinput = $('<input type="hidden" name="progid" class="progidclass"></input>');
-        $uinput.val(pid);
-        $td2.append($uinput)
-        $tr.append($td1).append($td2).append($td3).append($td4);
-        $table.append($tr);
-        $item.append($table);
-        $("#progtablebody").append($item);
       },
       editProgramInGroup(pid,gid,callback) {
         this.$root.$refs.permitForm.editProgramInGroup(pid,gid,callback);
       },
       removeProgramInGroup(pid,gid,callback) {
         this.$root.$refs.permitForm.removeProgramInGroup(pid,gid,callback);
+      },
+      startEditProgInGroup(item) {
+        console.log("startEditProgInGroup:",item);
+        this.editProgramInGroup(item.programid,this.localData.groupname);
+      },
+      startRemoveProgInGroup(item) {
+        console.log("startRemoveProgInGroup:",item);
+        confirmRemove([item.programid],() => { 
+          this.removeProgramInGroup(item.programid,this.localData.groupname,() => {
+            let index = this.proglists.findIndex((prg) => prg.programid == item.programid);
+            if(index >= 0) {
+              this.proglists.splice(index,1);
+            }
+          });
+        });
       },
     }
   };

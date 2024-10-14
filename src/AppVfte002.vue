@@ -176,8 +176,8 @@ export default {
       console.log("data",data,"response",response);
     },
     modifyUpdated(data,response) {
-      console.log("App: modify updated");
-      console.log("data",data,"response",response);
+      console.log("App: modify updated",data,"response",response);
+      this.isShowModify = false;
     },
     modifyCancel(data) {
       console.log("App: modify cancel",data);

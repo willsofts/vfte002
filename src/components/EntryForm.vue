@@ -281,8 +281,8 @@ export default {
               //reset data for new record insert
               this.resetRecord();
               setTimeout(() => this.$refs.groupname.focus(),100);
+              this.$emit('data-saved',dataRecord,data);
             });
-            this.$emit('data-saved',dataRecord,data);
           }
       });
     },
@@ -307,8 +307,8 @@ export default {
             if(detectErrorResponse(data)) return;
             successbox(() => {
               this.hideDialog();
+              this.$emit('data-updated',dataRecord,data);
             });
-            this.$emit('data-updated',dataRecord,data);
           }
       });
     },
@@ -359,8 +359,9 @@ export default {
           stopWaiting();
           console.log("deleteRecord: success",data);
           if(detectErrorResponse(data)) return;
-          successbox();
-          this.$emit('data-deleted',dataKeys,data);
+          successbox(() => {
+            this.$emit('data-deleted',dataKeys,data);
+          });
         }
       });	
     },
