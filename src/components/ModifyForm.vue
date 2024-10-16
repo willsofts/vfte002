@@ -155,7 +155,7 @@
   import { useVuelidate } from '@vuelidate/core';
   import { required, helpers } from '@vuelidate/validators';
   import $ from "jquery";
-  import { DEFAULT_CONTENT_TYPE, getApiUrl }  from '@willsofts/will-app';
+  import { DEFAULT_CONTENT_TYPE, getApiUrl, disableControls }  from '@willsofts/will-app';
   import { startWaiting, stopWaiting, submitFailure, detectErrorResponse }  from '@willsofts/will-app';
   import { confirmUpdate, confirmRemove, confirmCancel, successbox, serializeParameters, alertbox } from '@willsofts/will-app';
   import { InputNumber } from '@willsofts/will-control';
@@ -232,6 +232,7 @@
       },
       async updateClick() {
         console.log("click: update");
+        disableControls($("#updatemodifybutton"));
         let valid = await this.validateForm();
         if(!valid) return;
         this.startUpdateRecord();
