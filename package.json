@@ -14,7 +14,7 @@
     "@vueuse/core": "^11.1.0",
     "@vueuse/integrations": "^11.1.0",
     "@willsofts/will-app": "^1.0.27",
-    "@willsofts/will-control": "^1.0.22",
+    "@willsofts/will-control": "^1.0.23",
     "bootbox": "^6.0.0",
     "bootstrap": "^4.6.0",
     "core-js": "^3.8.3",
