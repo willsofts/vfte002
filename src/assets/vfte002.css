@@ -13,7 +13,7 @@
 li.prog-item-class { width: 99.8%; min-height: 55px; }
 table.prog-table-class td { font-size: 20px; padding-top: 10px; padding-bottom: 10px; }
 table.pro-table-class img { border: none; }
-table.prog-item-table-class { width: 100%; }
+table.prog-item-table-class { width: 100%; height: 36px; }
 
 td.progno-column { width: 10%; border-right: 1px solid gray;}
 td.progid-column { width: 30%; border-right: 1px solid gray;}

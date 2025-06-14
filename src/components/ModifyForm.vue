@@ -96,7 +96,7 @@
       </div>
 
 			<div id="programcontrollayer" class="row">
-			<div id="proglayerheader" class="pt-page-header pt-page-corser"><label id="progtrans_label">{{ labels.progtrans_label }}</label><a href="javascript:void(0)" class="pull-right up" @click="toggleCollapseExpand($event)"><em class="fa fa-chevron-circle-up fa-toggle-collapse"></em></a></div>
+			<div id="proglayerheader" class="pt-page-header pt-page-corser pt-page-subheader"><label id="progtrans_label">{{ labels.progtrans_label }}</label><a href="javascript:void(0)" class="pull-right up" @click="toggleCollapseExpand($event)"><em class="fa fa-chevron-circle-up fa-toggle-collapse"></em></a></div>
 				<div id="proglayer" class="portal-area portal-area-layer">
 					<div id="programrowlayer" class="row">
 						<div class="col-md-3 col-height col-label text-right">
