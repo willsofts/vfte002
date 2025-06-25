@@ -23,7 +23,7 @@ import EntryForm from '@/components/EntryForm.vue';
 import PermitForm from "@/components/PermitForm.vue";
 import { getLabelModel, getMultiLanguagesModel, getMetaInfo } from "@willsofts/will-app";
 import { DEFAULT_CONTENT_TYPE, getDefaultLanguage, setDefaultLanguage, getApiUrl } from "@willsofts/will-app";
-import { startApplication, serializeParameters } from "@willsofts/will-app";
+import { startApplication, serializeParameters, loadAndMergeLabel } from "@willsofts/will-app";
 
 const buildVersion = process.env.VUE_APP_BUILD_DATETIME;
 export default {
@@ -63,6 +63,11 @@ export default {
             this.$refs.pageHeader.changeLanguage(getDefaultLanguage());
           });
         }
+          loadAndMergeLabel("vfte002", (success) => {
+            if (success) {
+              this.changeLanguage(getDefaultLanguage());
+            }
+          });
       });
       //try to find out parameters from url
       const searchParams = new URLSearchParams(window.location.href);
