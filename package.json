@@ -21,6 +21,7 @@
     "jquery": "^3.7.1",
     "jquery-ui": "^1.13.3",
     "jquery-ui-dist": "^1.13.3",
+    "sortablejs": "^1.15.7",
     "vue": "^3.4.30"
   },
   "devDependencies": {
